@@ -8,13 +8,16 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
   operatorsAliases: false,
   port : 3306, 
 
-  pool: {
+  pool: {   
     max: dbConfig.pool.max,
     min: dbConfig.pool.min,
     acquire: dbConfig.pool.acquire,
     idle: dbConfig.pool.idle,
   },
 });
+// ALTERNATIVE 
+// const sequelize = new Sequelize('mysql://root@localhost:3306/unknown') 
+
 
 sequelize
   .authenticate()
