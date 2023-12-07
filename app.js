@@ -4,12 +4,20 @@ const express = require("express")
 const app = express()
 require("dotenv").config()
 const passport = require("passport")
+const { users } = require("./model/index")
+const generateToken = require("./services/generateToken")
+const organizationRoute = require("./routes/organizationRoute")
+const cookieParser = require("cookie-parser")
 // REQUIRES END HERE 
 
 // MIDDLEWARES 
+app.use(cookieParser())
 app.set("view engine","ejs")
  app.use(passport.initialize())
  app.use(passport.session())
+
+ app.use(express.json())
+ app.use(express.urlencoded({extended:true}))
 
  passport.serializeUser(function(user,cb){
     cb(null,user)  // cb(error,success) --> cb(error)
@@ -47,32 +55,48 @@ function(accessToken,refreshToken,profile,done){
 }
 ))
 
+
 app.get("/auth/google",passport.authenticate("google",{scope : ['profile','email']}) )
 
 app.get("/auth/google/callback",passport.authenticate("google",{
     failureRedirect : "http://localhost:3000"
 }),
-function(req,res){
+async function(req,res){
+  const userGoogleEmail=  userProfile.emails[0].value
     // check if google lay deko email already table ma exists xa ki nae vanerw  
-    // const users =  await users.findAll({
-        // where : {
-            email : userProfile.email.values.
-        // }
-    // /
+  const user = await users.findOne({
+    where : {
+        email : userGoogleEmail
+    }
+  })
+  if(user){
+    // token generate garney 
+ const token = generateToken(user)
+ res.cookie('token',token)
+ res.redirect("/organization")
 
-    // xa 
-     // token generate garney ; jwt.sign
+  }else{
+    // register the user 
+   const user =  await users.create({
+        email : userGoogleEmail,
+        googleId  : userProfile.id,
+        username : userProfile.displayName
+    })
+    
 
-    // xainw 
-     // users.create({})
- res.send("Logged in successfully")
+    const token = generateToken(user)
+    res.cookie('token',token)
+    res.redirect("/organization")
+  }
+
 }
 )
 
 // google login ends here 
 
 
-
+// routes middlwares 
+app.use("/",organizationRoute)
 
 const PORT = process.env.PORT || 4000
 app.listen(PORT,()=>{
