@@ -47,14 +47,70 @@ exports.createOrganization = async(req,res,next)=>{
 
 
 
-exports.createForumTable = async(req,res)=>{
+exports.createQuestionsTable = async(req,res,next)=>{
     const organizationNumber   = req.organizationNumber
     
     // create table
 
-    await sequelize.query(`CREATE TABLE forum_${organizationNumber}(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,questions VARCHAR(255),answer VARCHAR(255))`,{
+    await sequelize.query(`CREATE TABLE question_${organizationNumber}(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,title VARCHAR(255),description TEXT, userId INT NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP )`,{
         type : QueryTypes.CREATE
     })
-    res.send("Organization created successfully")
+    next()
 }
+
+exports.createAnswersTable = async(req,res)=>{
+    const organizationNumber = req.organizationNumber 
+
+    await sequelize.query(`CREATE TABLE answer_${organizationNumber}(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,userId INT NOT NULL REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE, answer TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, questionId INT REFERENCES questions(id) ON DELETE CASCADE ON UPDATE CASCADE )`,{
+        type : QueryTypes.CREATE
+    })
+    res.redirect("/dashboard")
+}
+
+
+
+
+// dashboard
+
+exports.renderDashboard = (req,res)=>{
+    res.render("dashboard/index")
+}
+
+exports.renderForumPage = async(req,res)=>{
+    const organizatonNumber = req.user[0].currentOrgNumber
+
+    const questions = await sequelize.query(`SELECT * FROM question_${organizatonNumber}`,{
+        type : QueryTypes.SELECT
+    })
+    res.render("dashboard/forum",{questions : questions})
+}
+
+exports.renderQuestionForm = (req,res)=>{
+    res.render("dashboard/askQuestion")
+
+}
+
+
+exports.createQuestion = async (req,res)=>{
+   const organizationNumber = req.user[0].currentOrgNumber
+
+    const userId = req.userId
+  
+    const {title,description} = req.body 
+    if(!title || !description){
+        return res.send("Please provide title,description")
+    }
+
+    // insert data into tables 
+    await sequelize.query(`INSERT INTO question_${organizationNumber} (title,description,userId) VALUES(?,?,?) `,{
+        type : QueryTypes.INSERT,
+        replacements : [title,description,userId]
+    })
+    res.redirect("/forum")
+
+}
+
+
+
+
 

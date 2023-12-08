@@ -3,9 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Your Website</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20190223/ourmid/pngtree-blue-background-city-summit-forum-background-material-backgroundcitypeakforumdata-informationinformation-technologydata-image_73704.jpg'); /* Replace with your image URL */
+            background-size: cover;
+            background-position: center;
+            font-family: Arial, sans-serif;
+        }
+
+        #login-container {
+            /* background-color: rgba(255, 255, 255, 0.8);  */
+            padding: 20px;
+            color : white;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        #google-sign-in-button {
+            margin-top: 20px;
+            padding : 12px
+        }
+        button{
+            padding : 12px;
+         
+        }
+        a{
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
-    <button><a href="/auth/google">Login With Google</a></button>
+    <div id="login-container">
+        <h1>Welcome to SaaS Class</h1>
+        <!-- Add your Google Sign-In button code here -->
+        <div id="google-sign-in-button">
+            <!-- Replace 'YOUR_CLIENT_ID' with your actual Google API Client ID -->
+            <button><a href="/auth/google">Sign in with Google</a></button>
+        </div>
+    </div>
+
+
 </body>
 </html>
