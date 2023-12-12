@@ -144,10 +144,26 @@ exports.renderSingleQuestion = async (req,res)=>{
         type : QueryTypes.SELECT,
         replacements : [id]
     })
-    res.render("dashboard/singleQuestion",{question,questionImages })
+    const answers = await sequelize.query(`SELECT * FROM answer_${organizationNumber} JOIN users ON users.id = answer_${organizationNumber}.userId WHERE questionId=?`,{
+        type : QueryTypes.SELECT, 
+        replacements : [id]
+    })
+   
+    res.render("dashboard/singleQuestion",{question,questionImages,answers })
 }
 
+exports.answerQuestion = async(req,res)=>{
+    const organizationNumber = req.user[0].currentOrgNumber
+    const {text,questionId} = req.body 
+    const userId = req.userId 
 
-
-
+    await sequelize.query(`INSERT INTO answer_${organizationNumber} (userId,questionId,answer) VALUES(?,?,?)`,{
+        type : QueryTypes.INSERT,
+        replacements : [userId,questionId,text]
+    })
+    res.json({
+        status : 200, 
+        message : "Answer sent successfully"
+    })
+}
 

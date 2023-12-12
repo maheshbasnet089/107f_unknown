@@ -139,14 +139,28 @@
          
           </div>
         </div>
-
+      <% answers.forEach((answer)=>{ %>
+        <div class="card">
+          <div class="card-body">
+            <p class="mb-0">  Answer <%- answer.id %>  : <%- answer.answer %> </p>
+          <i style="font-size: 13px;">Answered By : <%- answer.username %></i><br>
+          <i style="font-size: 12px;"><%- answer.created_at.toString().slice(0,15) %></i>
+          
+         
+          </div>
+        </div>  
+       <% }) %> 
         <h4>Your Answer
         </h4>
-        <div id="editor">
-            <p >Hello World!</p>
-            <p>Some initial <strong>bold</strong> text</p>
-            <p><br></p>
-          </div>
+    <form id="answerForm">
+      <div id="editor">
+        <p >You answer goes here....</p>
+       
+        <p><br></p>
+      </div>
+      <input type="hidden" id="questionId" name="questionId" value="<%- question[0].id %>">
+      <button type="submit">submit</button>
+    </form>
       </div>
     </div>
   </div>
@@ -159,14 +173,33 @@
     theme: 'snow'
   });
   var editor_content = quill.container.innerHTML
-  //   const editor = document.getElementById("hello")
-  //   const value = editor
-  function handler() {
-      var editor_content = quill.container.innerHTML
-      console.log(editor_content)
+  function getEditorContent() {
+   return quill.root.innerHTML.trim()
 }
 
-quill.on('text-change', handler);
+
+
+
+document.getElementById("answerForm").addEventListener("submit", async function(event){
+  event.preventDefault()
+  const answerContent = getEditorContent()
+  const questionId = document.getElementById("questionId").value
+  
+ const response =  await fetch("/answer",{
+    method : "POST",
+    headers : {
+      'Content-Type' : 'application/json'
+    },
+    body : JSON.stringify({text : answerContent,questionId : questionId})
+  })
+const data =   await response.json()
+if(data.status == 200){
+  window.location.reload()
+}else{
+  alert("Something went wrong")
+}
+  
+})
 
 
 </script>
