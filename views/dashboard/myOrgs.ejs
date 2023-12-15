@@ -52,7 +52,11 @@
                 <span class="hide-menu">Forum</span>
               </a>
             </li>
-          
+        
+   
+           
+          </ul>
+       
         </nav>
         <!-- End Sidebar navigation -->
       </div>
@@ -86,6 +90,7 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
                   <div class="message-body">
+
                     <a href="/myorgs" class="d-flex align-items-center gap-2 dropdown-item">
                       <i class="ti ti-list-check fs-6"></i>
                       <p class="mb-0 fs-3">My Organizations</p>
@@ -100,34 +105,93 @@
       </header>
       <!--  Header End -->
       <div class="container-fluid">
-        <div class="container-fluid">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title fw-semibold mb-4">Hajur ko Question k xa sodhnu hola ? </h5>
-              <div class="card">
-                <div class="card-body">
-                  <form action="/question" method="post" enctype="multipart/form-data">
-                    <div class="mb-3">
-                      <label for="question" class="form-label">What is your question ?</label>
-                      <input type="text" class="form-control" name="title" id="question" aria-describedby="emailHelp">
-                    </div>
-                    <div class="mb-3">
-                      <label for="Elaborate" class="form-label">Could You Elaborate your Question ?</label><br>
-                      <textarea rows="5" cols="138" id="Elaborate" name="description"></textarea>
-                    </div>
-                    <div class="mb-3">
-                      <label for="Elaborate" class="form-label">Upload Question Screenshot here</label><br>
-                      <input type="file" name="questionImage" multiple >
-                    </div>
-               
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                  </form>
+        <!--  Row 1 -->
+    
+        <div class="row">
+       
+          <div class="col-lg-12 d-flex align-items-stretch">
+            <div class="card w-100">
+              <div class="card-body p-4">
+                <h5 class="card-title fw-semibold mb-4">My Organizations</h5>
+                <div class="table-responsive">
+                  <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+                      <tr>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Id</h6>
+                        </th>
+                    
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Name</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Org Number</h6>
+                          </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Email</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Phone</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0">Pan No</h6>
+                        </th>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Vat No</h6>
+                          </th>
+                          <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Address</h6>
+                          </th>
+                          <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0">Action</h6>
+                          </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                <% orgDatas.forEach((orgData,i)=>{ %>
+                    <tr>
+                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0"><%-i %></h6></td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-1"><%- orgData.name %></h6>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-danger rounded-3 fw-semibold"><%-orgData.organizationNumber == currentOrgNumber ? "Current Org" : ""  %></span>
+                              </div>                      
+
+                        </td>
+                        <td class="border-bottom-0">
+                            <p class="mb-0 fw-normal"><%- orgData.organizationNumber %></p>
+                          </td>
+                        <td class="border-bottom-0">
+                          <p class="mb-0 fw-normal"><%- orgData.email %></p>
+                        </td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0 fs-4"><%- orgData.phoneNumber%></h6>
+                          </td>
+                        <td class="border-bottom-0">
+                          <h6 class="fw-semibold mb-0 fs-4"><%- orgData.panNo %></h6>
+                        </td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0 fs-4"><%- orgData.vatNo %></h6>
+                          </td>
+                          <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0 fs-4"><%- orgData.address%></h6>
+                          </td>
+                          <td class="border-bottom-0">
+                            <div class="d-flex align-items-center gap-2">
+                              <span class="badge bg-danger rounded-3 fw-semibold" onclick="window.location.href='/organization/<%- orgData.organizationNumber %>'" >Delete</span>
+                            </div>
+                          </td>
+                      </tr> 
+                <% })  %>
+                                   
+                    </tbody>
+                  </table>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -135,7 +199,9 @@
   <script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/assets/js/sidebarmenu.js"></script>
   <script src="/assets/js/app.min.js"></script>
+  <script src="/assets/libs/apexcharts/dist/apexcharts.min.js"></script>
   <script src="/assets/libs/simplebar/dist/simplebar.js"></script>
+  <script src="/assets/js/dashboard.js"></script>
 </body>
 
 </html>

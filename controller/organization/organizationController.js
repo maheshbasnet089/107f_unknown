@@ -167,3 +167,72 @@ exports.answerQuestion = async(req,res)=>{
     })
 }
 
+exports.renderMyOrgs = async (req,res)=>{
+
+    const userId = req.userId
+    const organizationNumber = req.user[0].currentOrgNumber
+
+    // query the users_org table to get the orgNumber of this user 
+   const userOrgsNumber =  await sequelize.query(`SELECT organizationNumber FROM users_org WHERE userId=?`,{
+        type : QueryTypes.SELECT,
+        replacements : [userId]
+    })
+    // console.log(userOrgsNumber)
+    let orgDatas = []
+    for(var i = 0 ; i < userOrgsNumber.length; i++){
+       const [orgData] =  await sequelize.query(`SELECT * FROM organization_${userOrgsNumber[i].organizationNumber}`)
+       orgDatas.push({...orgData[0],organizationNumber: userOrgsNumber[i].organizationNumber *1})
+    }
+    console.log(orgDatas)
+    res.render("dashboard/myOrgs",{orgDatas,currentOrgNumber : organizationNumber})
+}
+
+
+exports.deleteOrganization = async(req,res)=>{
+    const {id : organizationNumber} = req.params 
+    const currentOrg = req.user[0].currentOrgNumber
+    const userId = req.userId
+
+
+    // check whether it is currentOrg or not
+  
+
+    // check whether the org exists or not with above id 
+
+
+
+    await sequelize.query(`DROP TABLE IF EXISTS organization_${organizationNumber}`,{
+        type : QueryTypes.DELETE
+    })
+    await sequelize.query(`DROP TABLE IF EXISTS forum_${organizationNumber}`,{
+        type : QueryTypes.DELETE
+    })
+    await sequelize.query(`DROP TABLE IF EXISTS answer_${organizationNumber}`,{
+        type : QueryTypes.DELETE
+    })
+    await sequelize.query(`DELETE FROM users_org WHERE organizationNumber=?`,{
+        type : QueryTypes.DELETE,
+        replacements : [organizationNumber]
+    })
+   
+    
+    if(organizationNumber == currentOrg){
+        // switch to just past organization 
+        const userOrgsNumber =  await sequelize.query(`SELECT organizationNumber FROM users_org WHERE userId=?`,{
+            type : QueryTypes.SELECT,
+            replacements : [userId]
+        })
+       
+        const orgsLength = userOrgsNumber.length
+        const previousOrg = userOrgsNumber[orgsLength-1]
+        console.log(previousOrg)
+        const user = await users.findByPk(userId)
+        console.log(user)
+        user.currentOrgNumber = previousOrg.organizationNumber 
+        await user.save()
+        
+
+
+    }
+    res.redirect("/myorgs")
+}
