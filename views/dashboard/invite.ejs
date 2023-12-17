@@ -7,9 +7,6 @@
   <title>unknown Free</title>
   <link rel="shortcut icon" type="image/png" href="/assets/images/logos/favicon.png" />
   <link rel="stylesheet" href="/assets/css/styles.min.css" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-
 </head>
 
 <body>
@@ -55,7 +52,7 @@
                 <span class="hide-menu">Forum</span>
               </a>
             </li>
-           
+          
         </nav>
         <!-- End Sidebar navigation -->
       </div>
@@ -82,7 +79,6 @@
           </ul>
           <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-              <a href="/question" class="btn btn-primary">Ask Question</a>
               <li class="nav-item dropdown">
                 <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
                   aria-expanded="false">
@@ -90,9 +86,6 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
                   <div class="message-body">
-            
-            
-            
                     <a href="/myorgs" class="d-flex align-items-center gap-2 dropdown-item">
                       <i class="ti ti-list-check fs-6"></i>
                       <p class="mb-0 fs-3">My Organizations</p>
@@ -107,98 +100,29 @@
       </header>
       <!--  Header End -->
       <div class="container-fluid">
+        <div class="container-fluid">
           <div class="card">
-          <div class="card-body">
-            <h5 class="card-title fw-semibold mb-4"> Q: <%- question[0].title %> </h5>
-            <p class="mb-0"> <%- question[0].description %> </p>
-      
-            <div id="carouselExampleFade" class="carousel slide carousel-fade">
-                <div class="carousel-inner">
-                <% questionImages.forEach((image)=>{ %>
-                      <div class="carousel-item active">
-                    <img src="http://localhost:3000/<%-image.questionImage %> " class="d-block w-100" alt="..." height="400px" width="60%" style="margin-top: 30px;">
-                  </div>
-                <% }) %>
+            <div class="card-body">
+              <div class="card">
+                <div class="card-body">
+                  <form action="/invite" method="post">
+                    <div class="mb-3">
+                      <label for="question" class="form-label">What is your friend Gmail ?</label>
+                      <input type="email" class="form-control" name="email" id="question" aria-describedby="emailHelp">
+                    </div>
+
                
+                    <button type="submit" class="btn btn-primary">Invite</button>
+                  </form>
                 </div>
-                
-                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
-                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                  <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
-                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                  <span class="visually-hidden">Next</span>
-                </button>
               </div>
-         
+
+            </div>
           </div>
         </div>
-      <% answers.forEach((answer)=>{ %>
-        <div class="card">
-          <div class="card-body">
-            <p class="mb-0">  Answer  : <%- answer.answer %> </p>
-          <i style="font-size: 13px;">Answered By : <%- answer.username %></i><br>
-          <i style="font-size: 12px;"><%- answer.created_at.toString().slice(0,15) %></i>
-          
-         
-          </div>
-        </div>  
-       <% }) %> 
-        <h4>Your Answer
-        </h4>
-    <form id="answerForm">
-      <div id="editor">
-        <p >You answer goes here....</p>
-       
-        <p><br></p>
-      </div>
-      <input type="hidden" id="questionId" name="questionId" value="<%- question[0].id %>">
-      <button type="submit">submit</button>
-    </form>
       </div>
     </div>
   </div>
-  <!-- Include the Quill library -->
-<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-
-<!-- Initialize Quill editor -->
-<script>
-  var quill = new Quill('#editor', {
-    theme: 'snow'
-  });
-  var editor_content = quill.container.innerHTML
-  function getEditorContent() {
-   return quill.root.innerHTML.trim()
-}
-
-
-
-
-document.getElementById("answerForm").addEventListener("submit", async function(event){
-  event.preventDefault()
-  const answerContent = getEditorContent()
-  const questionId = document.getElementById("questionId").value
-  
- const response =  await fetch("/answer",{
-    method : "POST",
-    headers : {
-      'Content-Type' : 'application/json'
-    },
-    body : JSON.stringify({text : answerContent,questionId : questionId})
-  })
-const data =   await response.json()
-if(data.status == 200){
-  window.location.reload()
-}else{
-  alert("Something went wrong")
-}
-  
-})
-
-
-</script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
   <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
   <script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/assets/js/sidebarmenu.js"></script>

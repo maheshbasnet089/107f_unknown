@@ -1,7 +1,16 @@
 const { QueryTypes } = require("sequelize")
 const { sequelize, users } = require("../../model")
 
+const crypto = require("crypto")
+const sendEmail = require("../../services/sendEmail")
+
 exports.renderOrganizationForm = (req,res)=>{
+    // check whether the user already created org or not and redirect accordinly 
+    const currentOrgNumber = req.user[0].currentOrgNumber 
+    if(currentOrgNumber){
+        res.redirect('/dashboard')
+        return
+    }
     res.render("addOrganization")
 }
 
@@ -28,6 +37,14 @@ exports.createOrganization = async(req,res,next)=>{
     await sequelize.query(`CREATE TABLE organization_${organizationNumber}(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255), phoneNumber VARCHAR(255), address VARCHAR(255), panNo VARCHAR(255), vatNo VARCHAR(255) )`,{
         type : QueryTypes.CREATE
     })
+
+    // users_invitations table
+
+    await sequelize.query(`CREATE TABLE invitations_${organizationNumber}(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,userId INT REFERENCES users(id), token VARCHAR(55) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,{
+        type : QueryTypes.CREATE
+    })
+
+
 
     // insert above data to table 
     await sequelize.query(`INSERT INTO organization_${organizationNumber}(name,email,phoneNumber,address,panNo,vatNo) VALUES (?,?,?,?,?,?) `,{
@@ -156,11 +173,26 @@ exports.answerQuestion = async(req,res)=>{
     const organizationNumber = req.user[0].currentOrgNumber
     const {text,questionId} = req.body 
     const userId = req.userId 
+    const answerGarneyManxeyKoEmail = req.user[0].email
+
+    // const take out the question garney ko email 
+   const [data] =  await sequelize.query(`SELECT users.email FROM question_${organizationNumber} JOIN users ON question_${organizationNumber}.userId = users.id WHERE question_${organizationNumber}.id=?`,{
+        type : QueryTypes.SELECT,
+        replacements : [questionId]
+    })
+    const questionGarneyManxeyKoEmail = data.email 
 
     await sequelize.query(`INSERT INTO answer_${organizationNumber} (userId,questionId,answer) VALUES(?,?,?)`,{
         type : QueryTypes.INSERT,
         replacements : [userId,questionId,text]
     })
+
+    await sendEmail({
+        email : questionGarneyManxeyKoEmail,
+        subject : "Someone has answered your Question in unknown",
+        text : `${answerGarneyManxeyKoEmail} has answered your question. His answer was : ${text} `
+    })
+
     res.json({
         status : 200, 
         message : "Answer sent successfully"
@@ -183,7 +215,6 @@ exports.renderMyOrgs = async (req,res)=>{
        const [orgData] =  await sequelize.query(`SELECT * FROM organization_${userOrgsNumber[i].organizationNumber}`)
        orgDatas.push({...orgData[0],organizationNumber: userOrgsNumber[i].organizationNumber *1})
     }
-    console.log(orgDatas)
     res.render("dashboard/myOrgs",{orgDatas,currentOrgNumber : organizationNumber})
 }
 
@@ -235,4 +266,65 @@ exports.deleteOrganization = async(req,res)=>{
 
     }
     res.redirect("/myorgs")
+}
+
+
+exports.renderInvitePage = (req,res)=>{
+    res.render("dashboard/invite")
+}
+
+function generateToken(length=32){
+    return crypto.randomBytes(length).toString('hex')
+}
+
+exports.inviteFriends = async(req,res)=>{
+    const {email:receiverEmail} = req.body 
+    const currentOrg = req.user[0].currentOrgNumber
+    const userEmail = req.user[0].email 
+    const userId = req.userId 
+
+    const token = generateToken(10)
+
+    // table ma Insert garney 
+
+    await sequelize.query(`INSERT INTO invitations_${currentOrg}(userId,token) VALUES(?,?)`,{
+        type : QueryTypes.INSERT,
+        replacements : [userId,token]
+    })
+
+    // email pani pathaunu paryo 
+
+     await sendEmail({
+        email : receiverEmail, 
+        subject : "Invitation To Join Unknown Organization",
+        userEmail : userEmail, 
+        text : `${userEmail} is inviting you to join his/her organization. Click here to join: http://localhost:3000/accept-invite?org=${currentOrg}&token=${token}`
+     })
+
+     res.send("Invited Successfully")
+
+
+}
+
+
+exports.acceptInvitation = async(req,res)=>{
+ const {token,org:orgNumber} = req.query 
+ const userId = req.userId
+
+ // check whether that orgNumber organization have that token or not
+ const [exists] = await sequelize.query(`SELECT * FROM invitations_${orgNumber} WHERE token=?`,{
+    type : QueryTypes.SELECT,
+    replacements : [token]
+ })
+ if(exists){
+    // change the currentOrg value of the requesting user
+
+    const userData = await users.findByPk(userId)
+    userData.currentOrgNumber = orgNumber 
+    await userData.save()   
+    res.redirect("/dashboard")  
+ }else{
+    res.send("Invalid invitational Link")
+ }
+
 }
