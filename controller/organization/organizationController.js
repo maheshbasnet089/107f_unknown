@@ -23,10 +23,17 @@ exports.createOrganization = async(req,res,next)=>{
     // find data of above userId 
     const user = await users.findByPk(userId)
   
-    const organizationNumber = generateRandomNumber()
+    let organizationNumber = generateRandomNumber()
     const {organizationName,organizationAddress,organizationPhoneNumber,organizationEmail} = req.body 
     const organizationPanNumber = req.body.organizationPanNumber || null 
     const organizationVatNumber = req.body.organizationVatNumber|| null
+    // check whether organization of above exist or not 
+    // const [organization] = await sequelize.query(`SELECT * FROM organization_${organizationNumber}`,{
+    //     type : QueryTypes.SELECT
+    // })
+    // if(organization){
+    //     organizationNumber = generateRandomNumber()
+    // }
 
     // create users_org table 
     await sequelize.query(`CREATE TABLE IF NOT EXISTS users_org(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, userId INT REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE, organizationNumber VARCHAR(255))`,{
@@ -34,7 +41,7 @@ exports.createOrganization = async(req,res,next)=>{
     })
 
     // create organization Table 
-    await sequelize.query(`CREATE TABLE organization_${organizationNumber}(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255), phoneNumber VARCHAR(255), address VARCHAR(255), panNo VARCHAR(255), vatNo VARCHAR(255) )`,{
+    await sequelize.query(`CREATE TABLE  organization_${organizationNumber}(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255), phoneNumber VARCHAR(255), address VARCHAR(255), panNo VARCHAR(255), vatNo VARCHAR(255) )`,{
         type : QueryTypes.CREATE
     })
 
@@ -327,4 +334,61 @@ exports.acceptInvitation = async(req,res)=>{
     res.send("Invalid invitational Link")
  }
 
+}
+
+exports.deleteQuestions = async(req,res)=>{
+    const userId = req.userId 
+    const {id:questionId}  = req.params
+    console.log(questionId)
+    const organizationNumber = req.user[0].currentOrgNumber
+    // check whether question exist of above questionId or not
+    const [question] = await sequelize.query(`SELECT * FROM question_${organizationNumber} WHERE id=?`,{
+        type : QueryTypes.SELECT,
+        replacements : [questionId]
+
+    })
+    console.log(question)
+    if(!question){
+        res.send("Question doesn't exist of that ID")
+    }else{
+        // check whether the userId is the author of question
+        if(question.userId !==userId){
+            res.send("You don't have permission to perform this action")
+
+        }else{
+            await sequelize.query(`DELETE FROM question_${organizationNumber} WHERE id=?`,{
+            type  : QueryTypes.DELETE,
+            replacements : [questionId]
+            })
+            res.redirect("/question/"+ questionId)
+        }
+    }
+
+}
+
+exports.deleteAnswer = async(req,res)=>{
+    const userId = req.userId 
+    const {id:answerId}  = req.params
+    const organizationNumber = req.user[0].currentOrgNumber
+    // check whether question exist of above answerId or not
+    const [answer] = await sequelize.query(`SELECT * FROM answer_${organizationNumber} WHERE id=?`,{
+        type : QueryTypes.SELECT,
+        replacements : [answerId]
+
+    })
+    if(!answer){
+        res.send("answer doesn't exist of that ID")
+    }else{
+        // check whether the userId is the author of answer
+        if(answer.userId !==userId){
+            res.send("You don't have permission to perform this action")
+
+        }else{
+            await sequelize.query(`DELETE FROM answer_${organizationNumber} WHERE id=?`,{
+            type  : QueryTypes.DELETE,
+            replacements : [answerId]
+            })
+            res.redirect("/question/"+ answerId)
+        }
+    }
 }

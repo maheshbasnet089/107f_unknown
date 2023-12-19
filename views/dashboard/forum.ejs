@@ -108,8 +108,12 @@
             <p class="mb-0"><%- question.description.slice(0,300) %>... </p>
             <i class="mb-0">Asked By : <%- question.username %> </i> <br>
             <i class="mb-0" style="font-size: 12px;">Created at : <%- question.created_at.toString().slice(0,15) %> </i> <br>
-            <button style="margin-top: 20px;background-color: skyblue;color: white;padding: 4px;" onclick="window.location.href= '/question/<%- question.id %>'" >See More</button>
+            <!-- <button style="margin-top: 20px;background-color: skyblue;color: white;padding: 4px;" onclick="window.location.href= '/question/<%- question.id %>'" >See More</button> -->
+           
+            <a href="/qeuestiondelete/<%- question.id %>">Delete</a>
+          
           </div>
+          <button style="margin-top: 20px;background-color: skyblue;color: white;padding: 4px;" onclick="window.location.href= '/deletequestion/<%- question.id %>'" >Delete</button>
         </div>
     <% }) %>
       </div>
