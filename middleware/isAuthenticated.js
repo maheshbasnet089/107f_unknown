@@ -28,7 +28,7 @@ exports.isAuthenticated = async (req,res,next)=>{
     }else{
         req.user =  userExist; // alternative decryptedResult.id
         req.userId = userExist[0].id 
-      
+        req
         next();
     }
 }

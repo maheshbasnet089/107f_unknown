@@ -141,7 +141,9 @@
           <i style="font-size: 13px;">Answered By : <%- answer.username %></i><br>
           <i style="font-size: 12px;"><%- answer.created_at.toString().slice(0,15) %></i>
           
-         
+         <% if(answer.userId == userId){ %>
+          <a href="/answer/<%- answer.id %>">Delete</a>
+        <% } %>
           </div>
         </div>  
        <% }) %> 

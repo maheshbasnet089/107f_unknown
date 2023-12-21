@@ -15,6 +15,11 @@ module.exports = (sequelize, DataTypes) => {
       currentOrgNumber : {
         type : DataTypes.INTEGER,
         allowNull : true
+      },
+      role : {
+        type : DataTypes.ENUM('user','admin'),
+        
+        defaultValue : "user" 
       }
 
     

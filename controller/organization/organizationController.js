@@ -106,18 +106,34 @@ exports.createQuestionImages = async(req,res,next)=>{
 
 // dashboard
 
-exports.renderDashboard = (req,res)=>{
-    res.render("dashboard/index")
+exports.renderDashboard = async (req,res)=>{
+    const users = await sequelize.query(`SELECT * FROM users`,{
+        type : QueryTypes.SELECT,
+    })
+    const userOrgsNumber =  await sequelize.query(`SELECT organizationNumber FROM users_org`,{
+        type : QueryTypes.SELECT,
+      
+    })
+    
+    let orgDatas = []
+    for(var i = 0 ; i < userOrgsNumber.length; i++){
+       const [orgData] =  await sequelize.query(`SELECT * FROM organization_${userOrgsNumber[i].organizationNumber}`)
+       orgDatas.push({...orgData[0],organizationNumber: userOrgsNumber[i].organizationNumber *1})
+    }
+    console.log(orgDatas)
+    
+    res.render("dashboard/index",{users,organizations:orgDatas})
 }
 
 exports.renderForumPage = async(req,res)=>{
     const organizatonNumber = req.user[0].currentOrgNumber
+    const userId = req.userId
 
     const questions = await sequelize.query(`SELECT question_${organizatonNumber}.*,users.username FROM question_${organizatonNumber} JOIN users ON question_${organizatonNumber}.userId = users.id`,{
         type : QueryTypes.SELECT
     })
     console.log(questions)
-    res.render("dashboard/forum",{questions : questions})
+    res.render("dashboard/forum",{questions : questions,userId})
 }
 
 exports.renderQuestionForm = (req,res)=>{
@@ -158,6 +174,7 @@ exports.createQuestion = async (req,res)=>{
 }
 
 exports.renderSingleQuestion = async (req,res)=>{
+    const userId = req.userId
     const organizationNumber= req.user[0].currentOrgNumber
     const {id} = req.params
     const question = await sequelize.query(`SELECT * FROM question_${organizationNumber} WHERE id=?`,{
@@ -168,12 +185,13 @@ exports.renderSingleQuestion = async (req,res)=>{
         type : QueryTypes.SELECT,
         replacements : [id]
     })
-    const answers = await sequelize.query(`SELECT * FROM answer_${organizationNumber} JOIN users ON users.id = answer_${organizationNumber}.userId WHERE questionId=?`,{
+    const answers = await sequelize.query(`SELECT answer_${organizationNumber}.*,users.username FROM answer_${organizationNumber} JOIN users ON users.id = answer_${organizationNumber}.userId WHERE questionId=?`,{
         type : QueryTypes.SELECT, 
         replacements : [id]
     })
+  
    
-    res.render("dashboard/singleQuestion",{question,questionImages,answers })
+    res.render("dashboard/singleQuestion",{question,questionImages,answers,userId })
 }
 
 exports.answerQuestion = async(req,res)=>{
@@ -360,7 +378,7 @@ exports.deleteQuestions = async(req,res)=>{
             type  : QueryTypes.DELETE,
             replacements : [questionId]
             })
-            res.redirect("/question/"+ questionId)
+            res.redirect("/forum")
         }
     }
 
@@ -369,6 +387,7 @@ exports.deleteQuestions = async(req,res)=>{
 exports.deleteAnswer = async(req,res)=>{
     const userId = req.userId 
     const {id:answerId}  = req.params
+    console.log(answerId)
     const organizationNumber = req.user[0].currentOrgNumber
     // check whether question exist of above answerId or not
     const [answer] = await sequelize.query(`SELECT * FROM answer_${organizationNumber} WHERE id=?`,{
@@ -376,6 +395,7 @@ exports.deleteAnswer = async(req,res)=>{
         replacements : [answerId]
 
     })
+ 
     if(!answer){
         res.send("answer doesn't exist of that ID")
     }else{
@@ -388,7 +408,13 @@ exports.deleteAnswer = async(req,res)=>{
             type  : QueryTypes.DELETE,
             replacements : [answerId]
             })
-            res.redirect("/question/"+ answerId)
+            res.redirect("/question/"+ answer.questionId)
         }
     }
 }
+
+exports.logOut = (req,res)=>{
+    res.clearCookie('token')
+    res.redirect("/")
+}
+

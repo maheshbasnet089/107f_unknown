@@ -8,6 +8,7 @@ const { users } = require("./model/index")
 const generateToken = require("./services/generateToken")
 const organizationRoute = require("./routes/organizationRoute")
 const cookieParser = require("cookie-parser")
+const { decodeToken } = require("./services/decodeToken")
 // REQUIRES END HERE 
 
 // MIDDLEWARES 
@@ -57,6 +58,19 @@ function(accessToken,refreshToken,profile,done){
 
 }
 ))
+
+app.use(async(req,res,next)=>{
+  
+  const token = req.cookies.token 
+  if(token){
+      const decryptedResult = await decodeToken(token,process.env.SECRET)
+      if(decryptedResult && decryptedResult.id){
+          res.locals.currentUserRole = decryptedResult.role
+      }
+  }
+
+  next()
+})
 
 
 app.get("/auth/google",passport.authenticate("google",{scope : ['profile','email']}) )

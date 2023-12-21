@@ -1,4 +1,4 @@
-const { renderOrganizationForm, createOrganization, createQuestionsTable, createAnswersTable, renderDashboard, renderForumPage, renderQuestionForm, createQuestion, renderSingleQuestion, createQuestionImages, answerQuestion, renderMyOrgs, deleteOrganization, renderInvitePage, inviteFriends, acceptInvitation, deleteQuestions, deleteAnswer } = require("../controller/organization/organizationController")
+const { renderOrganizationForm, createOrganization, createQuestionsTable, createAnswersTable, renderDashboard, renderForumPage, renderQuestionForm, createQuestion, renderSingleQuestion, createQuestionImages, answerQuestion, renderMyOrgs, deleteOrganization, renderInvitePage, inviteFriends, acceptInvitation, deleteQuestions, deleteAnswer, logOut, fetchOrgs } = require("../controller/organization/organizationController")
 const { isAuthenticated } = require("../middleware/isAuthenticated")
 const {multer,storage} = require('../middleware/multerConfig')
 const upload = multer({storage : storage})
@@ -24,7 +24,9 @@ router.route("/invite").get(isAuthenticated,renderInvitePage).post(isAuthenticat
 
 router.route("/accept-invite").get(isAuthenticated,acceptInvitation)
 
+router.route("/logOut").get(isAuthenticated,logOut)
 router.route("/answer/:id").get(isAuthenticated,deleteAnswer)
+
 
 
 

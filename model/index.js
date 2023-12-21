@@ -1,3 +1,4 @@
+const seedAdmin = require("../adminSeeder.js");
 const dbConfig = require("../config/dbConfig");
 const { Sequelize, DataTypes } = require("sequelize");
 
@@ -19,14 +20,7 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
 // const sequelize = new Sequelize('mysql://root@localhost:3306/unknown') 
 
 
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log("CONNECTED!!");
-  })
-  .catch((err) => {
-    console.log("Error" + err);
-  });
+
 
 const db = {};
 
@@ -37,7 +31,15 @@ db.sequelize = sequelize;
 
 db.users = require("./userModel.js")(sequelize, DataTypes);
 
-
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log("CONNECTED!!");
+    seedAdmin(db.users)
+  })
+  .catch((err) => {
+    console.log("Error" + err);
+  });
 
 
 db.sequelize.sync({ force: false}).then(() => {
